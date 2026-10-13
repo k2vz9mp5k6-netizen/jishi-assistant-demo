@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吉时知日 · 行动助理</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #F7F2E8; color: #2B2620; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; min-height: 100vh; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+  .wrap { max-width: 768px; margin: 0 auto; padding: 0 16px; }
+
+  header { background: #9E1B1B; color: #F7F2E8; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+  header .wrap { padding-top: 20px; padding-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 22px; letter-spacing: 4px; }
+  header p { margin-top: 4px; font-size: 12px; color: #E8C96A; }
+  .zodiac-badge { background: rgba(255,255,255,.12); border-radius: 999px; padding: 6px 12px; font-size: 12px; }
+
+  nav { position: sticky; top: 0; z-index: 10; background: rgba(247,242,232,.95); backdrop-filter: blur(6px); border-bottom: 1px solid #E3D9C4; }
+  nav .wrap { display: flex; gap: 4px; padding-top: 8px; padding-bottom: 8px; }
+  nav button { flex: 1; padding: 8px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #6B5F45; }
+  nav button:hover { background: #F3ECDA; }
+  nav button.active { background: #9E1B1B; color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+
+  main .wrap { padding-top: 24px; padding-bottom: 96px; }
+  footer { margin-top: 40px; border-top: 1px solid #E3D9C4; padding-top: 16px; text-align: center; font-size: 12px; line-height: 1.8; color: #8A7B5C; }
+
+  .card { background: rgba(255,255,255,.72); border: 1px solid #E3D9C4; border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .card + .card { margin-top: 16px; }
+  h2 { font-size: 17px; }
+  .muted { color: #8A7B5C; }
+  .small { font-size: 12px; }
+
+  /* 日头 */
+  .dayhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .dayhead .date { font-size: 26px; font-weight: 800; }
+  .dayhead .lunar { color: #9E1B1B; font-weight: 600; margin-top: 2px; }
+  .dayhead .ganzhi { margin-top: 6px; font-size: 12px; color: #8A7B5C; }
+  .day-nav { display: flex; gap: 8px; align-items: center; }
+  .day-nav button { border: 1px solid #D8CDB2; border-radius: 10px; padding: 6px 12px; font-size: 13px; color: #6B5F45; background: #fff; }
+  .day-nav button:hover { background: #F3ECDA; }
+  .chips { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: #F3ECDA; color: #5C5240; }
+  .chip.red { background: #F7E3E3; color: #9E1B1B; }
+  .chong-banner { margin-top: 12px; border-radius: 12px; background: #FDF6E3; border: 1px solid #E3D9C4; padding: 10px 14px; font-size: 13px; color: #8a5a00; }
+
+  /* 时辰条 */
+  .hours { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin-top: 12px; }
+  .hours .h { text-align: center; font-size: 10px; padding: 5px 0; border-radius: 6px; color: #fff; }
+  .h.good { background: #4C8C5C; } .h.bad { background: #B4553F; } .h.warn { background: #C9A227; } .h.mid { background: #B9AE97; }
+
+  /* 行动卡 */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+  .action { border: 1px solid #E3D9C4; border-radius: 14px; padding: 14px; background: #fff; }
+  .action .top { display: flex; justify-content: space-between; align-items: center; }
+  .action .name { font-weight: 700; font-size: 14px; }
+  .badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+  .badge.yi { color: #1E6B3C; background: #E4F0E6; }
+  .badge.ping { color: #8A7B5C; background: #F3ECDA; }
+  .badge.ji { color: #9E1B1B; background: #F7E3E3; }
+  .action .note { margin-top: 8px; font-size: 12px; line-height: 1.6; color: #6B5F45; }
+  .wins { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .win { font-size: 12px; color: #1E6B3C; background: #F7F2E8; border-radius: 8px; padding: 4px 8px; }
+
+  /* 日历 */
+  .cal-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  select, input[type="date"], input[type="text"] { border: 1px solid #D8CDB2; border-radius: 10px; padding: 8px 10px; font-size: 14px; background: #fff; color: #2B2620; outline: none; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 16px; }
+  .cal-cell { aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; border: 1px solid transparent; }
+  .cal-cell .d { font-weight: 700; font-size: 13px; }
+  .cal-yi { background: #E4F0E6; color: #1E6B3C; } .cal-ping { background: #F3ECDA; color: #8A7B5C; } .cal-ji { background: #F7E3E3; color: #9E1B1B; }
+  .cal-cell.today { border-color: #9E1B1B; }
+  .legend { display: flex; gap: 12px; margin-top: 10px; font-size: 12px; color: #6B5F45; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+
+  /* 属相 */
+  .zgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 14px; }
+  .zgrid button { border: 1px solid #D8CDB2; border-radius: 12px; padding: 10px 0; font-size: 14px; color: #6B5F45; background: #fff; }
+  .zgrid button.sel { background: #9E1B1B; border-color: #9E1B1B; color: #fff; }
+
+  /* 订阅卡 */
+  .pro { overflow: hidden; border-radius: 16px; border: 1px solid rgba(201,162,39,.6); background: linear-gradient(135deg, #9E1B1B, #7A1414); color: #F7F2E8; padding: 24px; margin-top: 16px; }
+  .pro .tag { font-size: 11px; letter-spacing: 3px; color: #E8C96A; }
+  .pro h3 { margin-top: 8px; font-size: 20px; }
+  .pro p { margin-top: 8px; font-size: 13px; line-height: 1.7; color: #F0E6CF; }
+  .pro ul { margin-top: 14px; list-style: none; font-size: 13px; line-height: 2; }
+  .pro li::before { content: "◆ "; color: #E8C96A; }
+  .pro .price { margin-top: 16px; background: rgba(255,255,255,.1); border-radius: 12px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .pro .price b { color: #E8C96A; font-size: 18px; }
+  .pro .fine { margin-top: 10px; font-size: 11px; color: #D8C9AC; }
+
+  /* 悬浮按钮 */
+  .fab { position: fixed; right: 20px; bottom: 24px; z-index: 40; background: #9E1B1B; color: #fff; font-size: 14px; font-weight: 600; border-radius: 999px; padding: 12px 20px; box-shadow: 0 6px 16px rgba(0,0,0,.25); display: flex; gap: 8px; align-items: center; }
+  .fab:hover { background: #7A1414; }
+  .fab .n { background: #E8C96A; color: #7A1414; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 2px 8px; }
+
+  /* 对话框 */
+  .mask { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .dialog { background: #FDFAF2; border-radius: 16px; width: 100%; max-width: 540px; max-height: 85vh; overflow-y: auto; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+  .dialog .row { display: flex; gap: 8px; margin-top: 14px; }
+  .dialog .row input { flex: 1; }
+  .btn { background: #9E1B1B; color: #fff; border-radius: 10px; padding: 8px 16px; font-size: 14px; font-weight: 600; }
+  .btn:hover { background: #7A1414; }
+  .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .examples button { font-size: 12px; border: 1px solid #E3D9C4; border-radius: 999px; padding: 4px 10px; color: #6B5F45; }
+  .examples button:hover { background: #F3ECDA; }
+  .heard { margin-top: 14px; background: #F3ECDA; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #5C5240; }
+  .slot { border: 1px solid #E3D9C4; background: #fff; border-radius: 12px; padding: 14px; margin-top: 10px; }
+  .slot .top { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 700; }
+  .slot .note { margin-top: 6px; font-size: 12px; color: #6B5F45; line-height: 1.6; }
+  .slotwin { display: flex; justify-content: space-between; align-items: center; background: #F7F2E8; border-radius: 8px; padding: 8px 12px; margin-top: 8px; font-size: 13px; color: #1E6B3C; font-weight: 600; }
+  .slotwin button { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 4px 12px; background: #9E1B1B; color: #fff; }
+  .slotwin button.done { background: #1E6B3C; }
+  .remlist { margin-top: 16px; border-top: 1px solid #E3D9C4; padding-top: 12px; }
+  .rem { display: flex; justify-content: space-between; align-items: center; border: 1px solid #E3D9C4; background: #fff; border-radius: 8px; padding: 8px 12px; font-size: 12px; margin-top: 6px; }
+  .rem .cancel { color: #B0A489; } .rem .cancel:hover { color: #9E1B1B; }
+
+  /* 到点提示 */
+  .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 60; width: 92%; max-width: 440px; background: #FDF6E3; border: 1px solid #C9A227; border-radius: 16px; padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  .toast .t { font-size: 14px; font-weight: 800; color: #7A1414; }
+  .toast .b { margin-top: 4px; font-size: 12px; color: #6B5F45; }
+  .toast .x { position: absolute; top: 10px; right: 14px; font-size: 18px; color: #8A7B5C; }
+
+  .loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #9E1B1B; text-align: center; }
+  .loading .t { font-size: 24px; font-weight: 800; letter-spacing: 6px; }
+</style>
+</head>
+<body>
+<div id="app"><div class="loading"><div><div class="t">吉时知日</div><div class="small muted" style="margin-top:8px">日课装载中…</div></div></div></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
